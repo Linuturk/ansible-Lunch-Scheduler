@@ -1,4 +1,3 @@
-ansible-Lunch-Scheduler
-=======================
+#Ansible Playbook for deploying the Lunch-Scheduler repository.
 
-Ansible playbook to deploy the latest version of the Lunch Scheduler
+Given Ansible being installed, and SSH Keys in place, this should deploy the latest version of the Lunch Scheduler in an automated fashion.
