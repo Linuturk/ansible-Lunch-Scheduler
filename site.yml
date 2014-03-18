@@ -1,0 +1,44 @@
+- hosts: all
+  user: root
+  vars:
+    dbserver: localhost
+    dbname: lunchdb
+    dbuser: lunchcal
+    dbpass: secret123
+    docroot: /var/www/html
+  tasks:
+    - name: install packages
+      yum: name={{ item }} state=latest
+      with_items:
+        - httpd
+        - php
+        - mysql-server
+        - php-mysql
+        - MySQL-python
+        - git
+
+    - name: start services
+      service: name={{ item }} state=running enabled=True
+      with_items:
+        - httpd
+        - mysqld
+
+    - name: configure iptables
+      template: dest=/etc/sysconfig/iptables src=templates/iptables owner=root group=root mode=0600
+      notify: reload iptables
+
+    - name: checkout from git
+      git: repo=https://github.com/Linuturk/Lunch-Scheduler.git dest={{ docroot }}
+
+    - name: setup mysql database
+      mysql_db: name={{ dbname }} state=present
+
+    - name: setup mysql user
+      mysql_user: name={{ dbuser }} password={{ dbpass }} priv={{ dbname }}.*:ALL
+
+    - name: configure database parameters for web app
+      template: src=templates/database.inc dest={{ docroot }}/database.inc owner=root group=root mode=0644
+
+  handlers:
+    - name: reload iptables
+      service: name=iptables state=restarted
